@@ -1,0 +1,119 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bot ~ Uday</title>
+    <link rel="shortcut icon" href="./public/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./public/styles.css">
+    <!-- <script type="text/javascript" src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script> -->
+    <script src="/socket.io/socket.io.js"></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="text">WhatsApp Web Bot</h2>
+        <p class="small_text">~ by UdayKiran</p>
+        <div class="contact_icons">
+            <a href="https://wa.me/+919381400582?text=Hi Uday.." target="_blank">
+                <i class="bi bi-whatsapp"></i>
+            </a>
+            <a href="https://www.instagram.com/sweet_lover_uday/" target="_blank">
+                <i class="bi bi-instagram"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/udaykiranbandarugalla/" target="_blank">
+                <i class="bi bi-linkedin"></i>
+            </a>
+            <a href="https://github.com/udaykirancodes" target="_blank">
+                <i class="bi bi-github"></i>
+            </a>
+        </div>
+        <div class="qr_code" id="qr_code">
+            <img src="./public/snap.jpg" class="image" alt="QR CODE">
+        </div>
+        <div class="status">
+            <p class="state_text">Not Connected</p>
+            <p class="status_text"></p>
+        </div>
+        <div class="box_container">
+            <div class="box">
+                <p class="box_head">Personal Messages</p>
+                <p class="box_body" id="personal">-</p>
+            </div>
+            <div class="box">
+                <p class="box_head">Birthday Wishes</p>
+                <p class="box_body" id="wishes">-</p>
+            </div>
+            <div class="box">
+                <p class="box_head">Group Messages</p>
+                <p class="box_body" id="group">-</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let loc = window.location.href;
+        console.log(loc);
+        const socket = io.connect(loc);
+
+        const status_text = document.querySelector('.status_text');
+        const image = document.querySelector('.image');
+        const connectedState = document.querySelector('.state_text');
+
+        const personal = document.querySelector('#personal');
+        const wishes = document.querySelector('#wishes');
+        const group = document.querySelector('#group');
+
+        socket.on('notification', (state) => {
+            console.log(state);
+            status_text.innerHTML = state.notification;
+            if (state.connected === true) {
+                connectedState.innerHTML = 'Connected';
+                personal.innerHTML = state.personalChats || 0;
+                wishes.innerHTML = state.wishes || 0;
+                group.innerHTML = state.groupChats || 0;
+            }
+            else {
+                connectedState.innerHTML = 'Not Connected';
+                personal.innerHTML = 0;
+                wishes.innerHTML = 0;
+                group.innerHTML = 0;
+            }
+            setTimeout(() => {
+                status_text.innerHTML = ' ';
+            }, 3000);
+        })
+        socket.on('message', (state) => {
+            if (state.connected === true) {
+                connectedState.innerHTML = 'Connected';
+                personal.innerHTML = state.personalChats || 0;
+                wishes.innerHTML = state.wishes || 0;
+                group.innerHTML = state.groupChats || 0;
+            }
+            else {
+                connectedState.innerHTML = 'Not Connected';
+                personal.innerHTML = 0;
+                wishes.innerHTML = 0;
+                group.innerHTML = 0;
+            }
+            status_text.innerHTML = state.notification;
+            setTimeout(() => {
+                status_text.innerHTML = ' ';
+            }, 3000);
+        })
+        socket.on('qrcode', (url) => {
+            // alert('QrCode')
+            image.src = url;
+        })
+        socket.on('authenticated', (state) => {
+            image.src = './public/snap.jpg';
+        })
+
+        // socket.on('')
+    </script>
+</body>
+
+</html>
