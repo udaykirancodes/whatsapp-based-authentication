@@ -9,7 +9,8 @@ export function Profile({ link }) {
 
     const [data, setData] = useState({
         name: 'Loading...',
-        phone: 'Loading'
+        phone: 'Loading',
+        dp: '',
     });
     const [token, setToken] = useState('');
 
@@ -80,7 +81,7 @@ export function Profile({ link }) {
                         </div>
                     </div>
                     <div className="flex flex-col items-center pb-10">
-                        <img className="w-24 h-24 mb-3 rounded-full shadow-lg border p-5" src={image} alt="Bonnie image" />
+                        <img className="w-24 h-24 mb-3 rounded-full shadow-lg border p-1" src={data.dp == "" ? image : data.dp} alt="Bonnie image" />
                         <h5 className="mb-1 text-xl font-medium text-gray-900 dark:text-white">{data.name}</h5>
                         <span className="text-xl text-gray-500 dark:text-gray-200">+{data.phone.substring(0, 2) + " " + data.phone.substring(2, data.phone.length - 5)}</span>
                         <div className="flex mt-4 space-x-3 md:mt-6">

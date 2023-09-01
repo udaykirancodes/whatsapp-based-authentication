@@ -7,7 +7,7 @@ const io = require('socket.io')(http, {
         origin: "*"
     }
 });
-
+const qrcodeTerminal = require('qrcode-terminal');
 // Backend Imports
 const cors = require('cors');
 app.use(cors({ origin: "*" }));
@@ -33,13 +33,16 @@ const { Client, RemoteAuth } = require('whatsapp-web.js');
 let clientCount = 0;
 let client = null;
 let socketter;
+
+
+
 mongoose.connect(config.mongoUrl).then(() => {
     const store = new MongoStore({ mongoose: mongoose });
     client = new Client({
-        // puppeteer: {
-        //     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        //     headless: true
-        // },
+        puppeteer: {
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
+        },
         authStrategy: new RemoteAuth({
             store: store,
             clientId: "uday",
@@ -79,9 +82,10 @@ mongoose.connect(config.mongoUrl).then(() => {
     });
     client.on('qr', qr => {
         console.log('QR Code Sent!!')
+        qrcodeTerminal.generate(qr, { small: true });
         socketSender('notification', 'Qr Code Sent , Please Scan !!');
         qrcode.toDataURL(qr, (err, url) => {
-            socketter.emit('qrcode', url);
+            socketter?.emit('qrcode', url);
         })
     });
     client.on('message', async message => {
@@ -90,6 +94,7 @@ mongoose.connect(config.mongoUrl).then(() => {
         }
         if (message.from.endsWith('@c.us')) {
             // Personal Chat
+            console.log(message);
             send(message, client);
         }
         else {
@@ -102,12 +107,18 @@ mongoose.connect(config.mongoUrl).then(() => {
 // Send Function
 const send = async (message, client) => {
     try {
-        console.log(message);
+
+
         let phoneNumber = message.from;
         // Send Seen Tick
         let chat = await client.getChats();
+        let contact = await chat[0].getContact();
+        console.log('Contact :- ' + contact);
+        console.log('contact id : ' + contact.id);
         chat[0].sendSeen()
         chat[0].sendStateTyping();
+        let dp = await contact.getProfilePicUrl();
+        console.log('dp is + ' + dp);
         console.log("Name is : " + message._data.notifyName);
         // check if user exists with mobile number
         let usr = await Users.findOne({ phone: phoneNumber });
@@ -131,7 +142,8 @@ const send = async (message, client) => {
             // user not present
             let newUser = new Users({
                 name: message._data.notifyName,
-                phone: phoneNumber
+                phone: phoneNumber,
+                dp: dp,
             })
             // save the user
             let savedUser = await newUser.save();
@@ -142,7 +154,7 @@ const send = async (message, client) => {
             }
             let authToken = await jwt.sign(data, config.jwt);
 
-            let url = `http://localhost:${config.port}/profile?token=${authToken}`;
+            let url = `http://localhost:${config.frontendPort}/profile?token=${authToken}`;
             let totalMsg = `Here is the Clickable Link : ${url}`;
             client.sendMessage(message.from, totalMsg, {
                 linkPreview: true
@@ -162,7 +174,7 @@ http.listen(config.port, function () {
 
 // ROUTES
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/frontend/build/index.html');
 });
 
 app.get('/check/:id', async (req, res) => {
@@ -191,7 +203,7 @@ const state = {};
 
 const socketSender = (emitingEvent, notification) => {
     // state.notification = notification;
-    socketter.emit(emitingEvent, state);
+    socketter?.emit(emitingEvent, state);
     setTimeout(() => {
         state.notification = '...';
     }, 1000);

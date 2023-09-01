@@ -9,6 +9,10 @@ const UserSchema = new mongoose.Schema({
         require: true,
         unique: true
     },
+    dp: {
+        type: String,
+        require: false
+    }
 })
 
 module.exports = mongoose.model('Users', UserSchema);

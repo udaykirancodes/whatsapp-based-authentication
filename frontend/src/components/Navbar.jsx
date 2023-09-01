@@ -1,22 +1,22 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 const menuItems = [
-    {
-        name: 'Home',
-        href: '/',
-    },
-    {
-        name: 'About',
-        href: '/',
-    },
-    {
-        name: 'Contact',
-        href: '/',
-    },
-    {
-        name: 'Blogs',
-        href: '/',
-    },
+    // {
+    //     name: 'Home',
+    //     href: '/',
+    // },
+    // {
+    //     name: 'About',
+    //     href: '/',
+    // },
+    // {
+    //     name: 'Contact',
+    //     href: '/',
+    // },
+    // {
+    //     name: 'Blogs',
+    //     href: '/',
+    // },
 ]
 function Navbar() {
     return (
